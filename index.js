@@ -73,6 +73,42 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 })
+app.get('/user/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Exclude sensitive information like the password before sending the response
+    const { _id, username } = user;
+    res.status(200).json({ _id, username });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// New route to get user by _id
+app.get('/user/id/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Exclude sensitive information like the password before sending the response
+    const { _id, username } = user;
+    res.status(200).json({ _id, username });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 // Start Server
 app.listen(PORT, () => {
