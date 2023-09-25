@@ -73,42 +73,35 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 })
-app.get('/user/:username', async (req, res) => {
+// Function to handle user retrieval and response
+const getUser = async (req, res, query) => {
   try {
-    const { username } = req.params;
-    const user = await User.findOne({ username });
+    const user = await User.findOne(query);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Exclude sensitive information like the password before sending the response
     const { _id, username } = user;
     res.status(200).json({ _id, username });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+// Route to get user by username
+app.get('/user/:username', (req, res) => {
+  const { username } = req.params;
+  getUser(req, res, { username });
 });
 
-// New route to get user by _id
-app.get('/user/id/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findById(id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Exclude sensitive information like the password before sending the response
-    const { _id, username } = user;
-    res.status(200).json({ _id, username });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
-  }
+// Route to get user by _id
+app.get('/user/id/:id', (req, res) => {
+  const { id } = req.params;
+  getUser(req, res, { _id: id });
 });
+
 
 // Start Server
 app.listen(PORT, () => {
